@@ -1,15 +1,8 @@
 package main
 
 import (
-	"log"
-
-	"gopkg.in/mgo.v2"
-)
-
-var (
-	database string
-	password string
-	status   string
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var username string
@@ -19,20 +12,20 @@ var asession *mgo.Session
 var collection *mgo.Collection
 var serr error
 
-var hosts string
-var db string
-
 // var mongoURL = os.Getenv("MONGOHOST")
 var mongoURL = "172.17.0.4"
 
 // var mongoDB = os.Getenv("MONGODB")
 var mongoDB = "amqpdemo"
 
-func InitializeMDB() {
+const (
+	COLLECTION = "orders"
+)
 
-	session, err := mgo.Dial(mongoURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	collection = session.DB(database).C("orders")
+func AddOrderToMongoDB(db *mgo.Database, o order) (bson.ObjectId, error) {
+
+	err := db.C(COLLECTION).Insert(&o)
+
+	AddOrderToRabbitMQ(o)
+	return o.ID, err
 }

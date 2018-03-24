@@ -1,93 +1,41 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/streadway/amqp"
-	"gopkg.in/mgo.v2/bson"
-	a "pack.ag/amqp"
 )
 
-var amqpclient *a.Client
-var aerr error
-var amqpsession *a.Session
-var amqpsender *a.Sender
-
-// var hosts string
-// var db string
-
 // var rabbitMQURL = os.Getenv("RABBITMQHOST")
-// var rabbitMQURL = flag.String("amqp", "amqp://guest:guest@172.17.0.5:5672/", "AMQP URI")
-var rabbitMQURL = "amqp://guest:guest@172.17.0.5:5672/"
+// var amqpURI = "amqp://guest:guest@172.17.0.5:5672/"
+var (
+	amqpURI = flag.String("amqp", "amqp://guest:guest@172.17.0.5:5672/", "AMQP URI")
+)
 
-func AddOrder(o order) (orderId string) {
+var conn *amqp.Connection
+var ch *amqp.Channel
+var q *amqp.Queue
 
-	return orderId
-}
-
-func AddOrderToMongoDB(o order) (orderId bson.ObjectId) {
-
-	// session = asession.Copy()
-
-	// NewOrderID := bson.NewObjectId()
-
-	// o.ID = NewOrderID.Hex()
-
-	// // o.Status = "Open"
-	// if o.Source == "" || o.Source == "string" {
-	//  o.Source = os.Getenv("SOURCE")
-	// }
-
-	// database = "amqp_demo"
-	// password = ""
-
-	// defer session.Close()
-
-	// serr = collection.Insert(o)
-	// log.Println("_id:", o)
-
-	// if serr != nil {
-	// log.Fatal("Problem inserting data: ", serr)
-	// log.Println("_id:", o)
-	// }
-
-	// return o.ID
-	AddOrderToRabbitMQ(o.ID, "test")
-	return o.ID
-}
-
-func AddOrderToRabbitMQ(orderId bson.ObjectId, orderSource string) {
-
-	conn, err := amqp.Dial(rabbitMQURL)
-	failOnError(err, "Failed to connect to RabbitMQ")
-
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-
-	q, err := ch.QueueDeclare(
-		"order",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	failOnError(err, "Failed to declare a queue")
-	fmt.Println(orderId)
-	fmt.Println(orderId.Hex())
-	body := "{'order':" + "'" + orderId.Hex() + "', 'source':" + "'" + orderSource + "'}"
+func AddOrderToRabbitMQ(o order) {
+	// body := "{'order':" + "'" + orderId.Hex() + "'}"
+	payload, err := json.Marshal(o)
 	err = ch.Publish(
-		"",
-		q.Name,
+		"go-amqp-exchange",
+		"order-queue",
 		false,
 		false,
 		amqp.Publishing{
 			DeliveryMode: amqp.Persistent,
 			ContentType:  "application/json",
-			Body:         []byte(body),
+			// Body:         []byte(body),
+			Body:      payload,
+			Timestamp: time.Now(),
 		})
-	log.Printf(" [x] Sent %s  queue: %s", orderId.Hex(), q.Name)
+	log.Printf(" Sent Order %s to queue: %s", o.ID.Hex(), "order_queue")
 	failOnError(err, "Failed to publish a message")
 }
 
@@ -96,4 +44,29 @@ func failOnError(err error, msg string) {
 		log.Fatalf("%s: %s", msg, err)
 		panic(fmt.Sprintf("%s: %s", msg, err))
 	}
+}
+
+func init() {
+	flag.Parse()
+	initAmqp()
+}
+
+func initAmqp() {
+	var err error
+
+	conn, err = amqp.Dial(*amqpURI)
+	failOnError(err, "Failed to connect to RabbitMQ")
+
+	ch, err = conn.Channel()
+	failOnError(err, "Failed to open a channel")
+
+	ch.QueueDeclare(
+		"order-queue",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	failOnError(err, "Failed to declare the queue")
 }

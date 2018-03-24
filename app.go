@@ -7,13 +7,21 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	mgo "gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type App struct {
 	Router *mux.Router
+	DB     *mgo.Database
 }
 
 func (a *App) Initialize() {
+	session, err := mgo.Dial(mongoURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	a.DB = session.DB("amqp_demo_db")
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
 }
@@ -27,20 +35,19 @@ func (a *App) initializeRoutes() {
 }
 
 func (a *App) makeOrder(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	var o order
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&o); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&o); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
-	AddOrderToMongoDB(o)
-
-	// if err := AddOrderToMongoDB(o); err != nil {
-	// 	respondWithError(w, http.StatusInternalServerError, "oops")
-	// 	return
-	// }
-
+	o.ID = bson.NewObjectId()
+	_, err := AddOrderToMongoDB(a.DB, o)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 	respondWithJSON(w, http.StatusCreated, o)
 }
 
