@@ -1,12 +1,9 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -26,7 +23,7 @@ func (a *App) Run(addr string) {
 }
 
 func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/api/order", a.makeOrder).Methods("POST")
+	a.Router.HandleFunc("/api/orders", a.makeOrder).Methods("POST")
 }
 
 func (a *App) makeOrder(w http.ResponseWriter, r *http.Request) {
@@ -36,12 +33,13 @@ func (a *App) makeOrder(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-	defer r.Body.Close()
 
-	if err := AddOrderToMongoDB(o); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	AddOrderToMongoDB(o)
+
+	// if err := AddOrderToMongoDB(o); err != nil {
+	// 	respondWithError(w, http.StatusInternalServerError, "oops")
+	// 	return
+	// }
 
 	respondWithJSON(w, http.StatusCreated, o)
 }
