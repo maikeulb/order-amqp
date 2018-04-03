@@ -38,7 +38,7 @@ func run() {
 	defer conn.Close()
 
 	q, err = ch.QueueDeclare(
-		"order-queue", // name, leave empty to generate a unique name
+		"order-queue", // name
 		true,          // durable
 		false,         // delete when usused
 		false,         // exclusive
