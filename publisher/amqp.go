@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	amqpURI = flag.String("amqp", "amqp://guest:guest@172.17.0.5:5672/", "AMQP URI")
+	amqpURI = flag.String("amqp", "amqp://guest:guest@172.17.0.4:5672/", "AMQP URI")
 )
 
 var conn *amqp.Connection
@@ -49,10 +49,10 @@ func AddOrderToRabbitMQ(o order) {
 		amqp.Publishing{
 			DeliveryMode: amqp.Persistent,
 			ContentType:  "application/json",
-			Body:      payload,
-			Timestamp: time.Now(),
+			Body:         payload,
+			Timestamp:    time.Now(),
 		})
-	log.Printf(" Sent Order %s to queue: %s", o.ID.Hex(), "order_queue")
+	log.Printf("Sent order %s to queue: %s", o.ID.Hex(), "order_queue")
 	failOnError(err, "Failed to publish a message")
 }
 

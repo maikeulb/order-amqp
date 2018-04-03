@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	amqpURI = flag.String("amqp", "amqp://guest:guest@172.17.0.5:5672/", "AMQP URI")
+	amqpURI = flag.String("amqp", "amqp://guest:guest@172.17.0.4:5672/", "AMQP URI")
 )
 
 var conn *amqp.Connection

@@ -13,7 +13,7 @@ var collection *mgo.Collection
 var serr error
 
 // var mongoURL = os.Getenv("MONGOHOST")
-var mongoURL = "172.17.0.4"
+var mongoURL = "172.17.0.7"
 
 // var mongoDB = os.Getenv("MONGODB")
 var mongoDB = "amqpdemo"
