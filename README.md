@@ -1,12 +1,11 @@
 # OrderMQ
 
-(Simple) Distributed application with RabbitMQ and MongoDB. Registered orders
-(through an API) are stored in MongoDB and published onto an exchange as
-serialized JSON and pushed onto the queue. A dummy service (console application)
-listens for income messages from the queue and consumes them.
-
-Protocol: AMQP 0-9-1 (Advanced Messaging Queue Protocol)
-Exchange Type: Direct (routed)
+(Simple) Distributed application with RabbitMQ and MongoDB. There are two parts
+to this application: a publisher (exposed as an API) and a consumer (console
+application). The publisher receives orders from the API client, persists them to
+MongoDB, and publishes them onto the exchange (as serialized JSON). The consumer
+listens for incoming messages from the queue via the routing key and logs the
+order to the console.
 
 Technology
 ----------
@@ -33,8 +32,11 @@ Sample Usage
 }
 ...
 ```
-logged to console from the publisher: `2018/04/03 16:35:47 Sent order 5ac3e5a39039e1051da55d1b to queue: order_queue`
-logged to console from the consumer: `2018/04/03 16:35:47 Received a message: {"id":"5ac3e5a39039e1051da55d1b","product":"ipad"}`
+logged to console from the publisher:  
+`2018/04/03 16:35:47 Sent order 5ac3e5a39039e1051da55d1b to queue: order_queue`
+
+logged to console from the consumer:  
+`2018/04/03 16:35:47 Received a message: {"id":"5ac3e5a39039e1051da55d1b","product":"ipad"}`
 
 Run
 ---
@@ -47,7 +49,7 @@ After that has been taken care of,
 go build (consumer)
 ./consumer
 go build (publisher)
-./producer
+./publisher
 Go to http://localhost:5000 and visit the above endpoint.
 ```
 
