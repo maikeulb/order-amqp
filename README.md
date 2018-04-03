@@ -30,7 +30,6 @@ Sample Usage
     "id": "5ac3e5a39039e1051da55d1b", 
     "product": "ipad"
 }
-...
 ```
 logged to console from the publisher:  
 `2018/04/03 16:35:47 Sent order 5ac3e5a39039e1051da55d1b to queue: order_queue`
@@ -41,11 +40,12 @@ logged to console from the consumer:
 Run
 ---
 
-`cd` into `./publisher`, open `amqp.go` and point the AMQP uri to your client;
-then `cd` into `./consumer`, open `db.go` and point the Mongo uri to your
-server. Lastly, take care of the dependencies via `go get`.
+`cd` into `./publisher`, open `amqp.go` and point the AMQP URI to your client
+and open `db.go` and point the MongoDB URI to your server;
+then `cd` into `./consumer`, open `amqp.go` and point the AMQP URI to your
+client. Lastly, take care of the dependencies via `go get`.
 
-After that has been taken care of,
+`cd` into `./order-mq` (if you are not already); then run:
 ```
 go build (consumer)
 ./consumer
