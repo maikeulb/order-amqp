@@ -40,9 +40,10 @@ logged to console from the consumer:
 
 Run
 ---
-First go go the publisher and then go to `amqp.go` and point the AMQP uri
-to your client; then go to `db.go` and point the Mongo uri to
-your server. 
+
+`cd` into `./publisher`, open `amqp.go` and point the AMQP uri to your client;
+then `cd` into `./consumer`, open `db.go` and point the Mongo uri to your
+server. Lastly, take care of the dependencies via `go get`.
 
 After that has been taken care of,
 ```
