@@ -42,7 +42,7 @@ func run() {
 		true,          // durable
 		false,         // delete when usused
 		false,         // exclusive
-		false,         // noWait
+		false,         // no-wait
 		nil,           // arguments
 	)
 	failOnError(err, "Error declaring the Queue")

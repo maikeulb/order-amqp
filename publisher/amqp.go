@@ -10,9 +10,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-// var rabbitMQURL = os.Getenv("RABBITMQHOST")
-// var amqpURI = "amqp://guest:guest@172.17.0.5:5672/"
-
 var (
 	amqpURI = flag.String("amqp", "amqp://guest:guest@172.17.0.5:5672/", "AMQP URI")
 )
@@ -35,15 +32,14 @@ func AddOrderToRabbitMQ(o order) {
 
 	q, err := ch.QueueDeclare(
 		"order-queue", // name
-		true,          // type
-		false,         // durable
-		false,         // autodelete
+		true,          // durable ??
+		false,         // delete when unused
 		false,         // exclusive
-		nil,           // nowait
+		false,         // no-wait
+		nil,           // arguments
 	)
 	failOnError(err, "Failed to declare the queue")
 
-	// body := "{'order':" + "'" + orderId.Hex() + "'}"
 	payload, err := json.Marshal(o)
 	err = ch.Publish(
 		"",     // exchange
@@ -53,7 +49,6 @@ func AddOrderToRabbitMQ(o order) {
 		amqp.Publishing{
 			DeliveryMode: amqp.Persistent,
 			ContentType:  "application/json",
-			// Body:         []byte(body),
 			Body:      payload,
 			Timestamp: time.Now(),
 		})
